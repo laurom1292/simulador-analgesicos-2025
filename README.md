@@ -1,0 +1,1 @@
+# simulador-analgesicos-2025
