@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Farmacología - Analgésicos | Laura Romero Castillo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .author-name {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .tab-container {
+            display: flex;
+            background: #34495e;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: #34495e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            background: #2c3e50;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.5);
+        }
+        
+        .content {
+            padding: 30px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .experiment-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .control-panel, .results-panel {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        select, input[type="number"], input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .range-value {
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            margin: 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .results-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        .result-value {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .mouse-visual {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+        
+        .mouse-icon {
+            font-size: 80px;
+            transition: all 0.3s;
+        }
+        
+        .mouse-normal { color: #95a5a6; }
+        .mouse-pain { color: #e74c3c; animation: shake 0.5s; }
+        .mouse-analgesic { color: #27ae60; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            color: #e67e22;
+            margin-bottom: 10px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .theory-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+        }
+        
+        .theory-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .theory-section p {
+            line-height: 1.8;
+            color: #34495e;
+            margin-bottom: 12px;
+        }
+        
+        .formula {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            border: 2px solid #3498db;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .variability-note {
+            background: #e8f4fd;
+            border-left: 3px solid #3498db;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #2c3e50;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .experiment-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+            
+            .author-name {
+                position: static;
+                display: block;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="author-name">Laura Romero Castillo</div>
+            <h1>🔬 Simulador Virtual de Farmacología</h1>
+            <p class="subtitle">Experimentos de Analgésicos - Sin uso de animales reales</p>
+        </header>
+        
+        <div class="tab-container">
+            <button class="tab active" onclick="showTab('hotplate')">Test de Placa Caliente</button>
+            <button class="tab" onclick="showTab('tailflick')">Test de Retirada de Cola</button>
+            <button class="tab" onclick="showTab('doseresponse')">Curva Dosis-Respuesta</button>
+            <button class="tab" onclick="showTab('comparison')">Comparación de Fármacos</button>
+            <button class="tab" onclick="showTab('theory')">Teoría y Conceptos</button>
+        </div>
+<!-- Test de Placa Caliente -->
+        <div id="hotplate" class="content active">
+            <h2>Test de Placa Caliente (Hot Plate Test)</h2>
+            <div class="info-box">
+                <h3>ℹ️ Información del Experimento</h3>
+                <p>El test de placa caliente evalúa la analgesia central midiendo el tiempo que tarda un ratón virtual en mostrar respuesta al dolor térmico.</p>
+            </div>
+            
+            <div class="variability-note">
+                📊 <strong>Nota:</strong> Los resultados incluyen variabilidad biológica simulada (±15%). Cada experimento mostrará valores ligeramente diferentes, reflejando la realidad experimental.
+            </div>
+            
+            <div class="experiment-container">
+                <div class="control-panel">
+                    <h3>Panel de Control</h3>
+                    
+                    <div class="control-group">
+                        <label>Seleccionar Fármaco:</label>
+                        <select id="hp-drug">
+                            <option value="control">Control (Solución Salina)</option>
+                            <option value="morphine">Morfina</option>
+                            <option value="tramadol">Tramadol</option>
+                            <option value="fentanyl">Fentanilo</option>
+                            <option value="ibuprofen">Ibuprofeno</option>
+                            <option value="aspirin">Aspirina</option>
+                            <option value="paracetamol">Paracetamol</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Dosis (mg/kg):</label>
+                        <input type="range" id="hp-dose" min="0" max="20" value="5" step="0.5" oninput="updateDoseValue('hp')">
+                        <div class="range-value" id="hp-dose-value">5 mg/kg</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Temperatura de la Placa (°C):</label>
+                        <input type="range" id="hp-temp" min="48" max="56" value="52" step="0.5" oninput="updateTempValue()">
+                        <div class="range-value" id="hp-temp-value">52°C</div>
+                    </div>
+                    
+                    <button onclick="runHotPlateTest()" class="btn-success">▶️ Iniciar Experimento</button>
+                    <button onclick="resetHotPlate()" class="btn-danger">🔄 Reiniciar</button>
+                </div>
+                
+                <div class="results-panel">
+                    <h3>Resultados</h3>
+                    <div class="mouse-visual">
+                        <div id="hp-mouse" class="mouse-icon mouse-normal">🐭</div>
+                        <p id="hp-status">Esperando inicio del experimento...</p>
+                    </div>
+                    
+                    <div class="results-display">
+                        <div class="result-item">
+                            <span class="result-label">Latencia Basal:</span>
+                            <span class="result-value" id="hp-baseline">-- s</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Latencia Post-Fármaco:</span>
+                            <span class="result-value" id="hp-postdrug">-- s</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">% Efecto Máximo Posible:</span>
+                            <span class="result-value" id="hp-mpe">-- %</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test de Retirada de Cola -->
+        <div id="tailflick" class="content">
+            <h2>Test de Retirada de Cola (Tail Flick Test)</h2>
+            <div class="info-box">
+                <h3>ℹ️ Información del Experimento</h3>
+                <p>El test de retirada de cola evalúa la analgesia espinal midiendo el tiempo de respuesta a un estímulo térmico aplicado en la cola.</p>
+            </div>
+            
+            <div class="variability-note">
+                📊 <strong>Nota:</strong> Los resultados incluyen variabilidad biológica simulada (±15%). Cada experimento mostrará valores ligeramente diferentes, reflejando la realidad experimental.
+            </div>
+            
+            <div class="experiment-container">
+                <div class="control-panel">
+                    <h3>Panel de Control</h3>
+                    
+                    <div class="control-group">
+                        <label>Seleccionar Fármaco:</label>
+                        <select id="tf-drug">
+                            <option value="control">Control (Solución Salina)</option>
+                            <option value="morphine">Morfina</option>
+                            <option value="tramadol">Tramadol</option>
+                            <option value="fentanyl">Fentanilo</option>
+                            <option value="naloxone">Naloxona (Antagonista)</option>
+                            <option value="morphine-naloxone">Morfina + Naloxona</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Dosis (mg/kg):</label>
+                        <input type="range" id="tf-dose" min="0" max="20" value="5" step="0.5" oninput="updateDoseValue('tf')">
+                        <div class="range-value" id="tf-dose-value">5 mg/kg</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Intensidad del Estímulo:</label>
+                        <select id="tf-intensity">
+                            <option value="low">Baja</option>
+                            <option value="medium" selected>Media</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="runTailFlickTest()" class="btn-success">▶️ Iniciar Experimento</button>
+                    <button onclick="resetTailFlick()" class="btn-danger">🔄 Reiniciar</button>
+                </div>
+                
+                <div class="results-panel">
+                    <h3>Resultados</h3>
+                    <div class="results-display">
+                        <div class="result-item">
+                            <span class="result-label">Latencia Basal:</span>
+                            <span class="result-value" id="tf-baseline">-- s</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Latencia a 15 min:</span>
+                            <span class="result-value" id="tf-15min">-- s</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Latencia a 30 min:</span>
+                            <span class="result-value" id="tf-30min">-- s</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Latencia a 60 min:</span>
+                            <span class="result-value" id="tf-60min">-- s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Curva Dosis-Respuesta -->
+        <div id="doseresponse" class="content">
+            <h2>Curva Dosis-Respuesta</h2>
+            <div class="info-box">
+                <h3>ℹ️ Información del Experimento</h3>
+                <p>Determina la relación entre la dosis del fármaco y su efecto analgésico. Permite calcular la ED50 (dosis efectiva 50).</p>
+            </div>
+            
+            <div class="experiment-container">
+                <div class="control-panel">
+                    <h3>Panel de Control</h3>
+                    
+                    <div class="control-group">
+                        <label>Seleccionar Fármaco:</label>
+                        <select id="dr-drug">
+                            <option value="morphine">Morfina</option>
+                            <option value="tramadol">Tramadol</option>
+                            <option value="fentanyl">Fentanilo</option>
+                            <option value="ibuprofen">Ibuprofeno</option>
+                            <option value="paracetamol">Paracetamol</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Número de Dosis a Evaluar:</label>
+                        <select id="dr-points">
+                            <option value="5">5 puntos</option>
+                            <option value="7" selected>7 puntos</option>
+                            <option value="10">10 puntos</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="generateDoseResponse()" class="btn-success">📊 Generar Curva</button>
+                    <button onclick="calculateED50()" class="btn-success">🧮 Calcular ED50</button>
+                </div>
+                
+                <div class="results-panel">
+                    <h3>Resultados</h3>
+                    
+                    <div class="results-display">
+                        <div class="result-item">
+                            <span class="result-label">ED50:</span>
+                            <span class="result-value" id="dr-ed50">-- mg/kg</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Eficacia Máxima:</span>
+                            <span class="result-value" id="dr-emax">-- %</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Pendiente (Hill):</span>
+                            <span class="result-value" id="dr-slope">--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="dr-chart"></canvas>
+                    </div>
+                    
+                    <table class="data-table" id="dr-table" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Dosis (mg/kg)</th>
+                                <th>% Efecto</th>
+                                <th>± SEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dr-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comparación de Fármacos -->
+        <div id="comparison" class="content">
+            <h2>Comparación de Analgésicos</h2>
+            <div class="info-box">
+                <h3>ℹ️ Información del Experimento</h3>
+                <p>Compara la potencia y eficacia de dos analgésicos seleccionados en las mismas condiciones experimentales.</p>
+            </div>
+            
+            <div class="experiment-container">
+                <div class="control-panel">
+                    <h3>Panel de Control</h3>
+                    
+                    <div class="comparison-selector">
+                        <div class="control-group">
+                            <label>Fármaco 1:</label>
+                            <select id="comp-drug1">
+                                <option value="morphine" selected>Morfina</option>
+                                <option value="tramadol">Tramadol</option>
+                                <option value="fentanyl">Fentanilo</option>
+                                <option value="ibuprofen">Ibuprofeno</option>
+                                <option value="aspirin">Aspirina</option>
+                                <option value="paracetamol">Paracetamol</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Dosis Fármaco 1 (mg/kg):</label>
+                            <input type="number" id="comp-dose1" value="5" min="0.1" max="50" step="0.5">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Fármaco 2:</label>
+                            <select id="comp-drug2">
+                                <option value="morphine">Morfina</option>
+                                <option value="tramadol">Tramadol</option>
+                                <option value="fentanyl">Fentanilo</option>
+                                <option value="ibuprofen" selected>Ibuprofeno</option>
+                                <option value="aspirin">Aspirina</option>
+                                <option value="paracetamol">Paracetamol</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Dosis Fármaco 2 (mg/kg):</label>
+                            <input type="number" id="comp-dose2" value="50" min="0.1" max="200" step="1">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Tipo de Test:</label>
+                        <select id="comp-test">
+                            <option value="hotplate">Placa Caliente</option>
+                            <option value="tailflick">Retirada de Cola</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="runComparison()" class="btn-success">📊 Comparar Fármacos</button>
+                    <button onclick="exportComparisonData()" class="btn-success">💾 Exportar Datos</button>
+                </div>
+                
+                <div class="results-panel">
+                    <h3>Resultados Comparativos</h3>
+                    
+                    <div class="chart-container">
+                        <canvas id="comp-chart"></canvas>
+                    </div>
+                    
+                    <table class="data-table" id="comp-table" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Fármaco</th>
+                                <th>Dosis (mg/kg)</th>
+                                <th>Clase</th>
+                                <th>Latencia Basal (s)</th>
+                                <th>Latencia Post (s)</th>
+                                <th>% MPE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comp-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Teoría y Conceptos -->
+        <div id="theory" class="content">
+            <h2>Teoría y Conceptos</h2>
+            
+            <div class="theory-section">
+                <h3>📚 Mecanismos del Dolor</h3>
+                <p><strong>Nocicepción:</strong> Proceso de detección y transmisión de estímulos nocivos desde los nociceptores periféricos hasta el SNC.</p>
+                <p><strong>Vías del dolor:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Vía ascendente: Nociceptores → Médula espinal → Tálamo → Corteza</li>
+                    <li>Modulación descendente: Control inhibitorio desde estructuras supraespinales</li>
+                </ul>
+            </div>
+            
+            <div class="theory-section">
+                <h3>💊 Clasificación de Analgésicos</h3>
+                
+                <h4>1. Opioides</h4>
+                <p><strong>Mecanismo:</strong> Agonistas de receptores μ (mu), δ (delta) y κ (kappa)</p>
+                <p><strong>Ejemplos:</strong> Morfina, Fentanilo, Tramadol</p>
+                
+                <h4>2. AINEs</h4>
+                <p><strong>Mecanismo:</strong> Inhibición de COX-1 y/o COX-2</p>
+                <p><strong>Ejemplos:</strong> Ibuprofeno, Diclofenaco, Aspirina</p>
+            </div>
+            
+            <div class="theory-section">
+                <h3>🧮 Fórmulas Importantes</h3>
+                
+                <div class="formula">
+                    % MPE = [(Latencia Post - Latencia Basal) / (Cutoff - Latencia Basal)] × 100
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Variables globales
+        let charts = {};
+        
+        // Datos de fármacos
+        const drugData = {
+            control: { 
+                name: 'Control', 
+                class: 'Salino', 
+                potency: 0, 
+                ed50: null,
+                emax: 0,
+                hill: 0
+            },
+            morphine: { 
+                name: 'Morfina', 
+                class: 'Opioide', 
+                potency: 1, 
+                ed50: 2.5,
+                emax: 95,
+                hill: 1.2
+            },
+            tramadol: { 
+                name: 'Tramadol', 
+                class: 'Opioide débil', 
+                potency: 0.1,
+                ed50: 25,
+                emax: 70,
+                hill: 1.0
+            },
+            fentanyl: { 
+                name: 'Fentanilo', 
+                class: 'Opioide', 
+                potency: 100,
+                ed50: 0.025,
+                emax: 98,
+                hill: 1.5
+            },
+            ibuprofen: { 
+                name: 'Ibuprofeno', 
+                class: 'AINE', 
+                potency: 0.01,
+                ed50: 150,
+                emax: 25,
+                hill: 0.8
+            },
+            aspirin: { 
+                name: 'Aspirina', 
+                class: 'AINE', 
+                potency: 0.008,
+                ed50: 200,
+                emax: 20,
+                hill: 0.7
+            },
+            paracetamol: { 
+                name: 'Paracetamol', 
+                class: 'Analgésico', 
+                potency: 0.05,
+                ed50: 50,
+                emax: 40,
+                hill: 0.9
+            },
+            naloxone: {
+                name: 'Naloxona',
+                class: 'Antagonista',
+                potency: -1,
+                ed50: 0.5,
+                emax: 0,
+                hill: 1
+            },
+            'morphine-naloxone': {
+                name: 'Morfina + Naloxona',
+                class: 'Combinación',
+                potency: 0.1,
+                ed50: 50,
+                emax: 10,
+                hill: 0.5
+            }
+        };
+        
+        // Función para añadir variabilidad biológica
+        function addVariability(value, percentage = 15) {
+            const variation = (Math.random() - 0.5) * 2 * (percentage / 100);
+            return value * (1 + variation);
+        }
+        
+        // Funciones de navegación
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        // Funciones de actualización de valores
+        function updateDoseValue(prefix) {
+            const dose = document.getElementById(prefix + '-dose').value;
+            document.getElementById(prefix + '-dose-value').textContent = dose + ' mg/kg';
+        }
+        
+        function updateTempValue() {
+            const temp = document.getElementById('hp-temp').value;
+            document.getElementById('hp-temp-value').textContent = temp + '°C';
+        }
+        
+        // Función para calcular efecto con variabilidad
+        function calculateEffect(drug, dose, baseLatency) {
+            if (!drugData[drug]) return baseLatency;
+            
+            const data = drugData[drug];
+            if (data.ed50 === null) return addVariability(baseLatency, 5);
+            
+            // Ecuación de Hill
+            const effect = data.emax * Math.pow(dose, data.hill) / 
+                          (Math.pow(data.ed50, data.hill) + Math.pow(dose, data.hill));
+            
+            // Calcular nueva latencia con variabilidad
+            const maxLatency = 30;
+            const theoreticalLatency = baseLatency + (effect / 100) * (maxLatency - baseLatency);
+            
+            // Añadir variabilidad biológica
+            const finalLatency = addVariability(theoreticalLatency);
+            
+            return Math.min(finalLatency, maxLatency);
+        }
+        
+        // Test de Placa Caliente
+        function runHotPlateTest() {
+            const drug = document.getElementById('hp-drug').value;
+            const dose = parseFloat(document.getElementById('hp-dose').value);
+            const temp = parseFloat(document.getElementById('hp-temp').value);
+            
+            // Calcular latencia basal con variabilidad
+            const baseLatency = 30 - (temp - 48) * 2.5;
+            const basalLatency = addVariability(Math.max(5, Math.min(15, baseLatency)), 10);
+            
+            // Calcular latencia post-fármaco con variabilidad
+            const postLatency = calculateEffect(drug, dose, basalLatency);
+            
+            // Calcular %MPE
+            const cutoff = 30;
+            const mpe = ((postLatency - basalLatency) / (cutoff - basalLatency)) * 100;
+            
+            // Actualizar UI
+            document.getElementById('hp-baseline').textContent = basalLatency.toFixed(1) + ' s';
+            document.getElementById('hp-postdrug').textContent = postLatency.toFixed(1) + ' s';
+            document.getElementById('hp-mpe').textContent = mpe.toFixed(1) + ' %';
+            
+            // Animar ratón
+            const mouse = document.getElementById('hp-mouse');
+            const status = document.getElementById('hp-status');
+            
+            mouse.className = 'mouse-icon mouse-pain';
+            status.textContent = 'Administrando fármaco...';
+            
+            setTimeout(() => {
+                if (mpe > 50) {
+                    mouse.className = 'mouse-icon mouse-analgesic';
+                    status.textContent = 'Efecto analgésico detectado';
+                } else if (mpe > 20) {
+                    mouse.className = 'mouse-icon mouse-normal';
+                    status.textContent = 'Efecto analgésico leve';
+                } else {
+                    mouse.className = 'mouse-icon mouse-pain';
+                    status.textContent = 'Sin efecto analgésico significativo';
+                }
+            }, 1500);
+        }
+        
+        function resetHotPlate() {
+            document.getElementById('hp-baseline').textContent = '-- s';
+            document.getElementById('hp-postdrug').textContent = '-- s';
+            document.getElementById('hp-mpe').textContent = '-- %';
+            document.getElementById('hp-mouse').className = 'mouse-icon mouse-normal';
+            document.getElementById('hp-status').textContent = 'Esperando inicio del experimento...';
+            document.getElementById('hp-dose').value = 5;
+            document.getElementById('hp-dose-value').textContent = '5 mg/kg';
+        }
+        
+        // Test de Tail Flick con variabilidad
+        function runTailFlickTest() {
+            const drug = document.getElementById('tf-drug').value;
+            const dose = parseFloat(document.getElementById('tf-dose').value);
+            const intensity = document.getElementById('tf-intensity').value;
+            
+            // Latencia basal según intensidad con variabilidad
+            let baseLatency = intensity === 'low' ? 4 : intensity === 'medium' ? 3 : 2;
+            baseLatency = addVariability(baseLatency, 10);
+            
+            // Calcular latencias en diferentes tiempos con variabilidad
+            const latencies = {
+                0: baseLatency,
+                15: addVariability(calculateEffect(drug, dose, baseLatency) * 0.9),
+                30: addVariability(calculateEffect(drug, dose, baseLatency)),
+                60: addVariability(calculateEffect(drug, dose, baseLatency) * 0.7)
+            };
+            
+            // Si es naloxona o combinación, reducir efecto
+            if (drug === 'naloxone' || drug === 'morphine-naloxone') {
+                latencies[15] = addVariability(baseLatency, 5);
+                latencies[30] = addVariability(baseLatency, 5);
+                latencies[60] = addVariability(baseLatency, 5);
+            }
+            
+            // Actualizar UI
+            document.getElementById('tf-baseline').textContent = latencies[0].toFixed(1) + ' s';
+            document.getElementById('tf-15min').textContent = latencies[15].toFixed(1) + ' s';
+            document.getElementById('tf-30min').textContent = latencies[30].toFixed(1) + ' s';
+            document.getElementById('tf-60min').textContent = latencies[60].toFixed(1) + ' s';
+        }
+        
+        function resetTailFlick() {
+            document.getElementById('tf-baseline').textContent = '-- s';
+            document.getElementById('tf-15min').textContent = '-- s';
+            document.getElementById('tf-30min').textContent = '-- s';
+            document.getElementById('tf-60min').textContent = '-- s';
+            document.getElementById('tf-dose').value = 5;
+            document.getElementById('tf-dose-value').textContent = '5 mg/kg';
+        }
+        
+        // Curva Dosis-Respuesta con gráfico visual
+        function generateDoseResponse() {
+            const drug = document.getElementById('dr-drug').value;
+            const numPoints = parseInt(document.getElementById('dr-points').value);
+            const data = drugData[drug];
+            
+            if (!data || data.ed50 === null) {
+                alert('No hay datos disponibles para este fármaco');
+                return;
+            }
+            
+            // Generar puntos de dosis
+            const doses = [];
+            const effects = [];
+            const minDose = data.ed50 / 100;
+            const maxDose = data.ed50 * 100;
+            
+            for (let i = 0; i < numPoints; i++) {
+                const logDose = Math.log10(minDose) + (Math.log10(maxDose) - Math.log10(minDose)) * i / (numPoints - 1);
+                const dose = Math.pow(10, logDose);
+                doses.push(dose);
+                
+                // Calcular efecto con ecuación de Hill y añadir variabilidad
+                const theoreticalEffect = data.emax * Math.pow(dose, data.hill) / 
+                              (Math.pow(data.ed50, data.hill) + Math.pow(dose, data.hill));
+                const effect = addVariability(theoreticalEffect, 8);
+                effects.push(effect);
+            }
+            
+            // Mostrar tabla
+            const table = document.getElementById('dr-table');
+            const tbody = document.getElementById('dr-table-body');
+            tbody.innerHTML = '';
+            
+            doses.forEach((dose, i) => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = dose.toFixed(3);
+                row.insertCell(1).textContent = effects[i].toFixed(1);
+                row.insertCell(2).textContent = '±' + (Math.random() * 5 + 2).toFixed(1);
+            });
+            
+            table.style.display = 'table';
+            
+            // Crear gráfico visual
+            const ctx = document.getElementById('dr-chart').getContext('2d');
+            
+            // Destruir gráfico anterior si existe
+            if (charts.doseResponse) {
+                charts.doseResponse.destroy();
+            }
+            
+            // Crear nuevo gráfico
+            charts.doseResponse = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: doses.map(d => d.toFixed(2)),
+                    datasets: [{
+                        label: data.name,
+                        data: effects,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#3498db',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Curva Dosis-Respuesta',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Dosis (mg/kg)',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '% Efecto',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        
+        function calculateED50() {
+            const drug = document.getElementById('dr-drug').value;
+            const data = drugData[drug];
+            
+            if (!data || data.ed50 === null) {
+                alert('No hay datos disponibles para este fármaco');
+                return;
+            }
+            
+            // Mostrar valores con ligera variabilidad
+            document.getElementById('dr-ed50').textContent = addVariability(data.ed50, 5).toFixed(2) + ' mg/kg';
+            document.getElementById('dr-emax').textContent = addVariability(data.emax, 3).toFixed(1) + ' %';
+            document.getElementById('dr-slope').textContent = addVariability(data.hill, 5).toFixed(2);
+        }
+        
+        // Comparación de Fármacos mejorada
+        function runComparison() {
+            const drug1 = document.getElementById('comp-drug1').value;
+            const drug2 = document.getElementById('comp-drug2').value;
+            const dose1 = parseFloat(document.getElementById('comp-dose1').value);
+            const dose2 = parseFloat(document.getElementById('comp-dose2').value);
+            const testType = document.getElementById('comp-test').value;
+            
+            const table = document.getElementById('comp-table');
+            const tbody = document.getElementById('comp-table-body');
+            tbody.innerHTML = '';
+            
+            // Calcular efectos para ambos fármacos
+            const drugs = [
+                {id: drug1, dose: dose1},
+                {id: drug2, dose: dose2}
+            ];
+            
+            const results = [];
+            
+            drugs.forEach(({id, dose}) => {
+                const data = drugData[id];
+                const baseLatency = testType === 'hotplate' ? 10 : 3;
+                const postLatency = calculateEffect(id, dose, baseLatency);
+                const cutoff = testType === 'hotplate' ? 30 : 15;
+                const mpe = ((postLatency - baseLatency) / (cutoff - baseLatency)) * 100;
+                
+                results.push({
+                    name: data.name,
+                    dose: dose,
+                    class: data.class,
+                    basal: baseLatency,
+                    post: postLatency,
+                    mpe: mpe
+                });
+                
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = data.name;
+                row.insertCell(1).textContent = dose.toFixed(1);
+                row.insertCell(2).textContent = data.class;
+                row.insertCell(3).textContent = baseLatency.toFixed(1);
+                row.insertCell(4).textContent = postLatency.toFixed(1);
+                row.insertCell(5).textContent = mpe.toFixed(1);
+            });
+            
+            table.style.display = 'table';
+            
+            // Crear gráfico comparativo
+            const ctx = document.getElementById('comp-chart').getContext('2d');
+            
+            if (charts.comparison) {
+                charts.comparison.destroy();
+            }
+            
+            charts.comparison = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: results.map(r => `${r.name} (${r.dose} mg/kg)`),
+                    datasets: [{
+                        label: '% MPE',
+                        data: results.map(r => r.mpe),
+                        backgroundColor: ['rgba(52, 152, 219, 0.7)', 'rgba(231, 76, 60, 0.7)'],
+                        borderColor: ['#3498db', '#e74c3c'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Comparación de Eficacia Analgésica',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: '% Efecto Máximo Posible',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function exportComparisonData() {
+            const table = document.getElementById('comp-table');
+            if (table.style.display === 'none') {
+                alert('Primero debe generar la comparación');
+                return;
+            }
+            
+            let csv = 'Fármaco,Dosis,Clase,Latencia Basal,Latencia Post,MPE\n';
+            const rows = document.getElementById('comp-table-body').rows;
+            
+            for (let row of rows) {
+                const rowData = [];
+                for (let cell of row.cells) {
+                    rowData.push(cell.textContent);
+                }
+                csv += rowData.join(',') + '\n';
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'comparacion_analgesicos_' + new Date().getTime() + '.csv';
+            a.click();
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDoseValue('hp');
+            updateDoseValue('tf');
+            updateTempValue();
+        });
+    </script>
+</body>
+</html>
